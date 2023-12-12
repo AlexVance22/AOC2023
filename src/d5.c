@@ -12,18 +12,16 @@ static i64 map_category(i64 val, Map map) {
     const i64 diff = val - map.from;
     if (diff >= 0 && diff < map.width) {
         return map.to + diff;
-    } else {
-        return val;
     }
+    return val;
 }
 
 static i64 map_reverse(i64 val, Map map) {
     const i64 diff = val - map.to;
     if (diff >= 0 && diff < map.width) {
         return map.from + diff;
-    } else {
-        return val;
     }
+    return val;
 }
 
 
@@ -139,26 +137,7 @@ i64 d5_2_impl(Lines* file) {
 }
 
 
-static void bubble_sort(Map* list, int len) {
-begin:
-    bool swapped = false;
-
-    for (int i = 0; i < len - 1; i++) {
-        if (list[i].to > list[i + 1].to) {
-            const Map temp = list[i];
-            list[i] = list[i + 1];
-            list[i + 1] = temp;
-            swapped = true;
-        }
-    }
-
-    if (swapped) {
-        goto begin;
-    }
-}
-
-
-i64 d5_2_impl_rev(Lines* file) {
+i64 d5_2_impl_rev(Lines* file) { // ca 50x faster
     i64 seeds[64];
     i64 seeds_len = 0;
 
@@ -190,10 +169,6 @@ i64 d5_2_impl_rev(Lines* file) {
             m->width = str_to_int(&token);
         }
     }
-
-    Map* locs     = map[6];
-    int  locs_len = map_len[6];
-    bubble_sort(locs, locs_len);
 
     for (i64 j = 0; j < INT64_MAX; j++) {
         i64 loc  = j;
