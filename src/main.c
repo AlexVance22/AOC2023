@@ -13,6 +13,7 @@
 #include "d10.h"
 #include "d11.h"
 #include "d12.h"
+#include "d13.h"
 
 
 int main(int argc, char** argv) {
@@ -28,16 +29,17 @@ int main(int argc, char** argv) {
     case 3:  d3();  break;
     case 4:  d4();  break;
     case 5:  d5();  break;
-    case 6: case 7: case 8: case 9: case 10: case 11: case 12:
-        fprintf(stderr, "i havent solved this problem yet\n");
-        return 1;
-    // case 6:  d6();  break;
-    // case 7:  d7();  break;
+    case 6:  d6();  break;
+    case 7:  d7();  break;
     // case 8:  d8();  break;
     // case 9:  d9();  break;
     // case 10: d10(); break;
     // case 11: d11(); break;
     // case 12: d12(); break;
+    // case 13: d13(); break;
+    case 8: case 9: case 10: case 11: case 12: case 13:
+         fprintf(stderr, "i havent solved this problem yet\n");
+         return 1;
     default:
         fprintf(stderr, "its too early for this problem yet\n");
         return 1;

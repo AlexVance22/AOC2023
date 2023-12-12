@@ -60,7 +60,7 @@ char* string_as_raw(String* self);
 size_t string_len(const String* self);
 bool string_eq(const String* self, const String* other);
 void string_print(const String* self);
-int string_to_int(const String* self);
+int64_t string_to_int(const String* self);
 
 
 #define STR(s) (str){ .buf = s, .len = sizeof(s) - 1 }
@@ -255,7 +255,7 @@ void string_print(const String* self) {
     str_print(&self->inner);
 }
 
-int string_to_int(const String* self) {
+int64_t string_to_int(const String* self) {
     return str_to_int(&self->inner);
 }
 
