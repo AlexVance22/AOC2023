@@ -1,6 +1,3 @@
-#include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
 #include "utils.h"
 
 
@@ -15,7 +12,7 @@ typedef struct Grid {
     size_t height;
 } Grid;
 
-char grid_get(const Grid* self, int x, int y) {
+static char grid_get(const Grid* self, int x, int y) {
     if (x < 0 || x >= (int)self->width || y < 0 || y >= (int)self->height) {
         return '.';
     }
@@ -28,7 +25,7 @@ typedef struct Vec2 {
 } Vec2;
 
 
-int find_max_3_digit_num(const int digits[5]) {
+static int find_max_3_digit_num(const int digits[5]) {
     if (digits[2] == -1) { return -1; }
     const int begin = (digits[1] == -1) ? 2 : ((digits[0] == -1) ? 1 : 0);
     const int end   = (digits[3] == -1) ? 3 : ((digits[4] == -1) ? 4 : 5);
@@ -165,5 +162,6 @@ void d3() {
     printf("result day 3 - part 1: %d",   d3_1_impl(&file));
     lines_reset(&file);
     printf(             ", part 2: %d\n", d3_2_impl(&file));
+    free_file_lines(&file);
 }
 

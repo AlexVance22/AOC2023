@@ -1,6 +1,3 @@
-#include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
 #include "utils.h"
 
 
@@ -107,5 +104,6 @@ void d4() {
     printf("result day 4 - part 1: %d",   d4_1_impl(&file));
     lines_reset(&file);
     printf(             ", part 2: %d\n", d4_2_impl(&file));
+    free_file_lines(&file);
 }
 

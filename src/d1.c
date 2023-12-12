@@ -1,20 +1,18 @@
-#include <stdbool.h>
-#include <stdio.h>
 #include <string.h>
 #include "utils.h"
 
 
-int first_digit(str val) {
+static int first_digit(str val) {
     for (int i = 0; i < (int)val.len; i++) { if (is_digit(val.buf[i])) { return to_digit(val.buf[i]); } }
     return -1;
 }
 
-int last_digit(str val) {
+static int last_digit(str val) {
     for (int i = (int)val.len; i >= 0; i--) { if (is_digit(val.buf[i])) { return to_digit(val.buf[i]); } }
     return -1;
 }
 
-int word_to_num(char* word) {
+static int word_to_num(char* word) {
     char buf[8] = { '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0' };
     for (int i = 0; i < 7; i++) {
         buf[i] = word[i];
@@ -93,5 +91,6 @@ void d1() {
     printf("result day 1 - part 1: %d",   d1_1_impl(&file));
     lines_reset(&file);
     printf(             ", part 2: %d\n", d1_2_impl(&file));
+    free_file_lines(&file);
 }
 

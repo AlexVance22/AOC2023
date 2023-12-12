@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "str.h"
+#include "vec.h"
 
 
 char* get_file(const char* file);
@@ -29,6 +30,7 @@ int to_digit(char val);
 
 #ifdef UTILS_IMPL
 #define STRING_IMPL
+#define VECTOR_IMPL
 #include "str.h"
 
 char* get_file(const char* file) {

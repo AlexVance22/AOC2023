@@ -4,6 +4,17 @@
 
 #include <stddef.h>
 #include <stdbool.h>
+#include <stdint.h>
+
+typedef int8_t   i8;
+typedef int16_t  i16;
+typedef int32_t  i32;
+typedef int64_t  i64;
+typedef uint8_t  u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
+
 
 typedef struct str {
     char* buf;
@@ -63,7 +74,7 @@ StrSplit str_split(const str* self);
 
 bool str_eq(const str* self, const str* other);
 void str_print(const str* self);
-int str_to_int(const str* self);
+int64_t str_to_int(const str* self);
 
 
 #endif
@@ -321,11 +332,11 @@ void str_print(const str* self) {
     fwrite(self->buf, sizeof(char), self->len, stdout);
 }
 
-int str_to_int(const str* self) {
-    int sum = 0;
+int64_t str_to_int(const str* self) {
+    int64_t sum = 0;
     for (size_t i = 0; i < self->len; i++) {
         sum *= 10;
-        sum += (int)(self->buf[i] - '0');
+        sum += (int64_t)(self->buf[i] - '0');
     }
     return sum;
 }

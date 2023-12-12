@@ -27,10 +27,10 @@ int main(int argc, char** argv) {
     case 2:  d2();  break;
     case 3:  d3();  break;
     case 4:  d4();  break;
-    case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12:
+    case 5:  d5();  break;
+    case 6: case 7: case 8: case 9: case 10: case 11: case 12:
         fprintf(stderr, "i havent solved this problem yet\n");
         return 1;
-    // case 5:  d5();  break;
     // case 6:  d6();  break;
     // case 7:  d7();  break;
     // case 8:  d8();  break;
