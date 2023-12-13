@@ -6,8 +6,10 @@ ODIR = obj
 CFLAGS = -Wall -DDEBUG
 LFLAGS = -Wall
 
-DEPS = $(wildcard $(SDIR)/*.h)
-SRCS = $(wildcard $(SDIR)/*.c)
+DEPS = $(wildcard $(SDIR)/*.h) \
+	   $(wildcard $(SDIR)/structs/*.h)
+SRCS = $(wildcard $(SDIR)/*.c) \
+	   $(wildcard $(SDIR)/structs/*.c)
 OBJS = $(patsubst $(SDIR)/%.c, $(ODIR)/%.o, $(SRCS))
 
 

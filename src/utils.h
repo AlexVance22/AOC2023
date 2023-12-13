@@ -5,8 +5,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
-#include "str.h"
-#include "vec.h"
+#include <string.h>
+#include "structs/str.h"
+#include "structs/vec.h"
 
 
 char* get_file(const char* file);
@@ -17,21 +18,18 @@ typedef struct Lines {
     char* last;
 } Lines;
 
+
 Lines lines(char* src);
 Lines get_file_lines(const char* file);
 void free_file_lines(Lines* file);
 bool lines_next(Lines* lines, str* dest);
 void lines_reset(Lines* lines);
 
-
 bool is_digit(char val);
 int to_digit(char val);
 
 
 #ifdef UTILS_IMPL
-#define STRING_IMPL
-#define VECTOR_IMPL
-#include "str.h"
 
 char* get_file(const char* file) {
     FILE* f = NULL;
