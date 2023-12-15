@@ -15,6 +15,9 @@ int d8_1_impl(Lines* file) {
     lines_next(file, &dirs);
     lines_next(file, &STR(""));
 
+    str cur = STR("AAA");
+    int steps = 0;
+
     for (str line; lines_next(file, &line);) {
         StrSplit split = str_split(&line);
         str key;
@@ -30,7 +33,20 @@ int d8_1_impl(Lines* file) {
         hashtable_set(&table, &key, &routes);
     }
 
-    return 0;
+    while (true) {
+        for (size_t i = 0; i < dirs.len; i++) {
+            if (str_eq(&cur, &STR("ZZZ"))) {
+                return steps;
+            }
+            Routes* r = hashtable_get(&table, &cur);
+            if (dirs.buf[i] == 'L') {
+                cur = r->left;
+            } else {
+                cur = r->right;
+            }
+            steps++;
+        }
+    }
 }
 
 

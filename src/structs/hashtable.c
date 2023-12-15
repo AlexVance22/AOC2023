@@ -1,10 +1,10 @@
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include "str.h"
+#include "hashtable.h"
 
 
-size_t string_hash(str s) {
+static size_t string_hash(str s) {
     uint64_t hash = 5381;
     for (size_t i = 0; i < s.len; i++) {
         hash = ((hash << 5) + hash) + s.buf[i];
@@ -12,28 +12,29 @@ size_t string_hash(str s) {
     return hash;
 }
 
-
-typedef struct TableEntry {
-    bool has;
-    str  key;
-} TableEntry;
-
-typedef struct HashTable {
-    size_t cap;
-    size_t size;
-    void* data;
-    TableEntry* track;
-} HashTable;
-
 const size_t HASHTABLE_INIT_CAP = 20;
 
 
 HashTable hashtable_new(size_t size) {
-    HashTable result;
-    result.cap = HASHTABLE_INIT_CAP;
-    result.size = size;
-    result.data =               calloc(HASHTABLE_INIT_CAP, size);
-    result.track = (TableEntry*)calloc(HASHTABLE_INIT_CAP, sizeof(TableEntry));
+    HashTable result = (HashTable){
+        .data =               calloc(HASHTABLE_INIT_CAP, size),
+        .track = (TableEntry*)calloc(HASHTABLE_INIT_CAP, sizeof(TableEntry)),
+        .cap = HASHTABLE_INIT_CAP,
+        .size = size
+    };
+    for (size_t i = 0; i < HASHTABLE_INIT_CAP; i++) {
+        result.track[i].has = false;
+    }
+    return result;
+}
+
+HashTable hashtable_with_hasher(size_t size, size_t(*hasher)(void*)) {
+    HashTable result = (HashTable){
+        .data =               calloc(HASHTABLE_INIT_CAP, size),
+        .track = (TableEntry*)calloc(HASHTABLE_INIT_CAP, sizeof(TableEntry)),
+        .cap = HASHTABLE_INIT_CAP,
+        .size = size
+    };
     for (size_t i = 0; i < HASHTABLE_INIT_CAP; i++) {
         result.track[i].has = false;
     }
@@ -45,68 +46,89 @@ void hashtable_free(HashTable* self) {
     free(self->track);
 }
 
-void _hashtable_grow(HashTable* self) {
+
+static void _hashtable_grow(HashTable* self) {
+    size_t cap = self->cap;
     self->cap *= 2;
     self->data =               realloc(self->data,  self->size         * self->cap);
     self->track = (TableEntry*)realloc(self->track, sizeof(TableEntry) * self->cap);
-}
-
-bool _hashtable_set_if_matches(HashTable* self, const str* key, void* val, size_t index) {
-    if (self->track[index].has) {
-        if (str_eq(&self->track[index].key, key)) {
-            self->track[index].has = true;
-            self->track[index].key = *key;
-            memcpy(self->data + index * self->size, val, self->size);
-            return true;
-        }
-        return false;
-    } else  {
-        self->track[index].has = true;
-        self->track[index].key = *key;
-        memcpy(self->data + index * self->size, val, self->size);
-        return true;
+    for (size_t i = cap; i < self->cap; i++) {
+        self->track[i].has = false;
     }
 }
 
-void hashtable_set(HashTable* self, const str* key, void* val) {
+static size_t _hashtable_index_of(HashTable* self, const str* key) {
     const size_t index = string_hash(*key) % self->cap;
 
-    if (_hashtable_set_if_matches(self, key, val, index)) {
-        return;
-    }
-    for (size_t i = index + 1; i < self->cap; i++) {
-        if (_hashtable_set_if_matches(self, key, val, i)) {
-            return;
-        }
-    }
-    for (size_t i = 0; i < index; i++) {
-        if (_hashtable_set_if_matches(self, key, val, i)) {
-            return;
+    for (size_t i = 0; i < self->cap; i++) {
+        const size_t j = (index + i) % self->cap;
+        if (self->track[j].has && str_eq(&self->track[j].key, key)) {
+            return j;
         }
     }
 
-    _hashtable_grow(self);
-    hashtable_set(self, key, val);
+    return self->cap;
+}
+
+static size_t _hashtable_index_of_or_empty(HashTable* self, const str* key) {
+    const size_t index = string_hash(*key) % self->cap;
+
+    for (size_t i = 0; i < self->cap; i++) {
+        const size_t j = (index + i) % self->cap;
+        if ((self->track[j].has && str_eq(&self->track[j].key, key)) || !self->track[j].has) {
+            return j;
+        }
+    }
+
+    return self->cap;
+}
+
+
+void hashtable_set(HashTable* self, const str* key, void* val) {
+    size_t index = _hashtable_index_of_or_empty(self, key);
+    if (index == self->cap) {
+        _hashtable_grow(self);
+        index = _hashtable_index_of_or_empty(self, key);
+    }
+    self->track[index].has = true;
+    self->track[index].key = *key;
+    memcpy((char*)self->data + (index * self->size), val, self->size);
 }
 
 void* hashtable_get(HashTable* self, const str* key) {
-    const size_t index = string_hash(*key) % self->cap;
+    const size_t index = _hashtable_index_of(self, key);
+    if (index == self->cap) {
+        return NULL;
+    }
+    return (char*)self->data + index * self->size;
+}
 
-    if (self->track[index].has && str_eq(&self->track[index].key, key)) {
-        return (char*)self->data + index * self->size;
-    } else {
-        for (size_t i = index; i < self->cap; i++) {
-            if (self->track[i].has && str_eq(&self->track[i].key, key)) {
-                return (char*)self->data + i * self->size;
-            }
-        }
-        for (size_t i = 0; i < index; i++) {
-            if (self->track[i].has && str_eq(&self->track[i].key, key)) {
-                return (char*)self->data + i * self->size;
-            }
+void hashtable_remove(HashTable* self, const str* key) {
+    const size_t index = _hashtable_index_of(self, key);
+    if (index == self->cap) {
+        return;
+    }
+    self->track[index].has = false;
+}
+
+
+HashTableIter hashtable_iter(HashTable* self) {
+    return (HashTableIter){
+        .inner = self,
+        .index = 0,
+    };
+}
+
+bool hashtable_next(HashTableIter* self, TablePair* output) {
+    for (size_t i = self->index; i < self->inner->cap; i++) {
+        if (self->inner->track[i].has) {
+            self->index = i + 1;
+            output->key = self->inner->track[i].key;
+            output->val  = (char*)self->inner->data + i * self->inner->size;
+            return true;
         }
     }
 
-    return NULL;
+    return false;
 }
 
